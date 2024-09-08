@@ -1,9 +1,10 @@
 const express = require("express");
 const app = express();
-const port = 3000;
+const port = 4000;
 
+const { loadContact,findContact } = require('./utils/contact')
 
-const expressLayout = require('express-ejs-layouts');
+const expressLayout = require("express-ejs-layouts");
 // Application middleware
 app.use((req, res, next) => {
     console.log("waktu saat ini : ", Date.now());
@@ -11,32 +12,43 @@ app.use((req, res, next) => {
 });
 
 // Gunakan ejs
-app.use(expressLayout)
+app.use(expressLayout);
 app.set("view engine", "ejs");
-app.use(express.static('public'))
+app.use(express.static("public"));
 
 app.get("/", (req, res) => {
     res.render("index", {
-        layout : './layouts/mainlayot',
-        title : 'Home page',
-        nama : 'azmi ghazy asyrof',
-        alamat: 'jalan pala2 timur'
+        layout: "./layouts/mainlayot",
+        title: "Home page",
+        nama: "azmi ghazy asyrof",
+        alamat: "jalan pala2 timur",
     });
 });
 
-
-
 app.get("/about", (req, res) => {
-    res.render("about",{
-        layout : './layouts/mainlayot',
-        title : 'About page'
+    res.render("about", {
+        layout: "./layouts/mainlayot",
+        title: "About page",
     });
 });
 
 app.get("/contact", (req, res) => {
-    res.render("contact",{
-        layout : './layouts/mainlayot',
-        title : 'Home page'
+    const contact = loadContact()
+    console.log(contact)
+    res.render("contact", {
+        layout: "./layouts/mainlayot",
+        contact,
+        title: "Home contact",
+    });
+});
+
+app.get("/contact/:nama", (req, res) => {
+    const contact = findContact(req.params.nama);
+    console.log(contact)
+    res.render("detail", {
+        layout: "./layouts/mainlayot",
+        contact,
+        title: "Home detail contact",
     });
 });
 
