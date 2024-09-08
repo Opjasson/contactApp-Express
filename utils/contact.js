@@ -22,10 +22,19 @@ const loadContact = function () {
 // load data contact by nama
 const findContact = function (nama) {
     const contacts = loadContact();
-    const contact = contacts.find((contact)=> contact.nama.toLowerCase() === nama.toLowerCase())
-    return contact
-}
+    const contact = contacts.find(
+        (contact) => contact.nama.toLowerCase() === nama.toLowerCase()
+    );
+    return contact;
+};
 
+// add contact
+const addContact = function (req) {
+    const contacts = loadContact();
+    const inputData = req;
 
+    contacts.push(inputData);
+    fs.writeFileSync("./data/contacts.json", JSON.stringify(contacts));
+};
 
-module.exports = { loadContact, findContact };
+module.exports = { loadContact, findContact, addContact };

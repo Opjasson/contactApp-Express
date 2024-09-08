@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const port = 4000;
 
-const { loadContact,findContact } = require('./utils/contact')
+const { loadContact, findContact, addContact } = require("./utils/contact");
 
 const expressLayout = require("express-ejs-layouts");
 // Application middleware
@@ -15,6 +15,7 @@ app.use((req, res, next) => {
 app.use(expressLayout);
 app.set("view engine", "ejs");
 app.use(express.static("public"));
+app.use(express.urlencoded());
 
 app.get("/", (req, res) => {
     res.render("index", {
@@ -33,8 +34,8 @@ app.get("/about", (req, res) => {
 });
 
 app.get("/contact", (req, res) => {
-    const contact = loadContact()
-    console.log(contact)
+    const contact = loadContact();
+    console.log(contact);
     res.render("contact", {
         layout: "./layouts/mainlayot",
         contact,
@@ -44,25 +45,39 @@ app.get("/contact", (req, res) => {
 
 app.get("/contact/add", (req, res) => {
     res.render("add", {
+        layout: "./layouts/mainlayot",
+        title: "add contact",
+    });
+});
+
+// Menambahkan data
+app.post("/contact/add", (req, res) => {
+    const contacts = loadContact()
+    const duplikat = contacts.find((contact)=> contact.nama === req.body.nama)
+    if(duplikat){
+        res.redirect('/contact/alreadyContact')
+    }else{
+        addContact(req.body)
+        res.redirect('/contact')
+    }
+});
+
+app.get('/contact/alreadyContact', (req, res) => {
+    res.render('alreadyData',{
         layout : './layouts/mainlayot',
-        title : "add contact"
+        title : 'Already use'
     })
 })
 
-// process data contact
-
-
 app.get("/contact/:nama", (req, res) => {
     const contact = findContact(req.params.nama);
-    console.log(contact)
+    console.log(contact);
     res.render("detail", {
         layout: "./layouts/mainlayot",
         contact,
         title: "Home detail contact",
     });
 });
-
-
 
 app.use("/", (req, res) => {
     res.send(404);
