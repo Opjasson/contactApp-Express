@@ -42,6 +42,16 @@ app.get("/contact", (req, res) => {
     });
 });
 
+app.get("/contact/add", (req, res) => {
+    res.render("add", {
+        layout : './layouts/mainlayot',
+        title : "add contact"
+    })
+})
+
+// process data contact
+
+
 app.get("/contact/:nama", (req, res) => {
     const contact = findContact(req.params.nama);
     console.log(contact)
@@ -52,9 +62,7 @@ app.get("/contact/:nama", (req, res) => {
     });
 });
 
-app.get("/user/:id", function (req, res) {
-    res.send("user : " + req.params.id);
-});
+
 
 app.use("/", (req, res) => {
     res.send(404);
