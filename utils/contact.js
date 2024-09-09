@@ -44,4 +44,30 @@ const addContact = function (req) {
     fs.writeFileSync("./data/contacts.json", JSON.stringify(contacts));
 };
 
-module.exports = { loadContact, findContact, addContact, cekDuplikat };
+//Delete contact
+const deleteContact = function (nama) {
+    const contacts = loadContact();
+    const filteredContact = contacts.filter((contact) => contact.nama !== nama);
+    fs.writeFileSync("./data/contacts.json", JSON.stringify(filteredContact));
+};
+
+// Update contact
+const updateContact = function (contactBaru) {
+    const contacts = loadContact();
+    // hilangkan contact lama yang namanya sama dengan oldNama
+    const filteredContact = contacts.filter(
+        (contact) => contact.nama !== contactBaru.oldNama
+    );
+    delete contactBaru.oldNama;
+    filteredContact.push(contactBaru);
+    fs.writeFileSync("./data/contacts.json", JSON.stringify(filteredContact));
+};
+
+module.exports = {
+    loadContact,
+    findContact,
+    addContact,
+    cekDuplikat,
+    deleteContact,
+    updateContact,
+};

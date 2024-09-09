@@ -7,6 +7,8 @@ const {
     findContact,
     addContact,
     cekDuplikat,
+    deleteContact,
+    updateContact,
 } = require("./utils/contact");
 
 const { query, validationResult, body, check } = require("express-validator");
@@ -38,8 +40,10 @@ app.use((req, res, next) => {
 // Gunakan ejs
 app.use(expressLayout);
 app.set("view engine", "ejs");
-app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
+
+// access static file
+app.use(express.static("public"));
 
 app.get("/", (req, res) => {
     res.render("index", {
@@ -64,7 +68,7 @@ app.get("/contact", (req, res) => {
         layout: "./layouts/mainlayot",
         contact,
         title: "Home contact",
-        msg : req.flash('msg')
+        msg: req.flash("msg"),
     });
 });
 
@@ -91,12 +95,11 @@ app.post(
                 title: "add contact",
                 errors: errors.array() || [],
             });
-        }else{
+        } else {
             addContact(req.body);
-            req.flash('msg', 'Data berhasil ditambahkan!')
+            req.flash("msg", "Data berhasil ditambahkan!");
             res.redirect("/contact");
         }
-
     }
 );
 
@@ -107,9 +110,64 @@ app.get("/contact/add", (req, res) => {
     });
 });
 
+// Proses delete contact
+app.get("/contact/delete/:nama", (req, res) => {
+    const contact = findContact(req.params.nama);
+
+    if (!contact) {
+        res.status(404);
+        res.send("<h1> Error Not Found</h1>");
+    } else {
+        deleteContact(req.params.nama);
+        req.flash("msg", "Data berhasil dihapus!");
+        res.redirect("/contact");
+    }
+});
+
+// Halaman form edit contact
+app.get("/contact/edit/:nama", (req, res) => {
+    const contact = findContact(req.params.nama)
+    res.render("edit", {
+        layout: "./layouts/mainlayot",
+        title: "Update contact",
+        contact,
+    });
+});
+
+// Proses edit data
+app.post(
+    "/contact/update",
+    [
+        check("email", "Email yang anda masukan salah").isEmail(),
+        check("noHp", "Nomor yang anda masukan salah").isMobilePhone("id-ID"),
+        body("nama").custom((value, { req }) => {
+            const duplikasi = cekDuplikat(value);
+            if (value !== req.body.oldNama && duplikasi) {
+                throw new Error("Nama sudah digunakan!");
+            }
+            return true;
+        }),
+    ],
+    (req, res) => {
+        const errors = validationResult(req);
+        console.log(errors);
+        if (!errors.isEmpty()) {
+            res.render("edit", {
+                layout: "./layouts/mainlayot",
+                title: "edit contact",
+                errors: errors.array() || [],
+                contact: req.body
+            });
+        } else {
+            updateContact(req.body);
+            req.flash("msg", "Data berhasil diubah!");
+            res.redirect("/contact");
+        }
+    }
+);
+// Halaman detail contact
 app.get("/contact/:nama", (req, res) => {
     const contact = findContact(req.params.nama);
-    console.log(contact);
     res.render("detail", {
         layout: "./layouts/mainlayot",
         contact,
