@@ -28,6 +28,13 @@ const findContact = function (nama) {
     return contact;
 };
 
+// cek duplikat
+const cekDuplikat = function (req) {
+    const contacts = loadContact();
+    const duplikat = contacts.find((contact) => contact.nama === req);
+    return duplikat;
+};
+
 // add contact
 const addContact = function (req) {
     const contacts = loadContact();
@@ -37,4 +44,4 @@ const addContact = function (req) {
     fs.writeFileSync("./data/contacts.json", JSON.stringify(contacts));
 };
 
-module.exports = { loadContact, findContact, addContact };
+module.exports = { loadContact, findContact, addContact, cekDuplikat };

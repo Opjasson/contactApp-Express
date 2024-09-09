@@ -1,4 +1,18 @@
 <h1>ini halaman about</h1>
+
+<% if (typeof errors !== 'undefined') { %>
+    <div class="alert alert-danger" role="alert">
+        <ul>
+            <% errors.forEach(error => { %>        
+                <li>
+                    <%- error.msg  %>
+                </li>
+            <% }) %>
+            <a href="/contact/add" class="alert-link">Masukan ulang data</a>
+        </ul>
+    </div>
+<% } %>
+
 <form method="POST">
     <div class="mb-3">
         <label for="nama" class="form-label">Nama</label>

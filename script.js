@@ -2,9 +2,16 @@ const express = require("express");
 const app = express();
 const port = 4000;
 
-const { loadContact, findContact, addContact } = require("./utils/contact");
+const {
+    loadContact,
+    findContact,
+    addContact,
+    cekDuplikat,
+} = require("./utils/contact");
 
+const { query, validationResult, body, check } = require("express-validator");
 const expressLayout = require("express-ejs-layouts");
+
 // Application middleware
 app.use((req, res, next) => {
     console.log("waktu saat ini : ", Date.now());
@@ -15,7 +22,7 @@ app.use((req, res, next) => {
 app.use(expressLayout);
 app.set("view engine", "ejs");
 app.use(express.static("public"));
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
     res.render("index", {
@@ -43,6 +50,38 @@ app.get("/contact", (req, res) => {
     });
 });
 
+
+// Menambahkan data
+app.post(
+    "/contact/add",
+    [
+        check("email", "Email yang anda masukan salah").isEmail(),
+        check("noHp", "Nomor yang anda masukan salah").isMobilePhone("id-ID"),
+        body("nama").custom((value) => {
+            const duplikasi = cekDuplikat(value);
+            if (duplikasi) {
+                throw new Error("Nama sudah digunakan!");
+            }
+            return true;
+        }),
+    ],
+    (req, res) => {
+        const errors = validationResult(req);
+        console.log(errors)
+        if (!errors.isEmpty()) {
+            res.render("add", {
+                layout: "./layouts/mainlayot",
+                title: "add contact",
+                errors: errors.array() || [],
+            });
+        }
+
+        addContact(req.body)
+        res.redirect('/contact')
+        
+    }
+);
+
 app.get("/contact/add", (req, res) => {
     res.render("add", {
         layout: "./layouts/mainlayot",
@@ -50,24 +89,6 @@ app.get("/contact/add", (req, res) => {
     });
 });
 
-// Menambahkan data
-app.post("/contact/add", (req, res) => {
-    const contacts = loadContact()
-    const duplikat = contacts.find((contact)=> contact.nama === req.body.nama)
-    if(duplikat){
-        res.redirect('/contact/alreadyContact')
-    }else{
-        addContact(req.body)
-        res.redirect('/contact')
-    }
-});
-
-app.get('/contact/alreadyContact', (req, res) => {
-    res.render('alreadyData',{
-        layout : './layouts/mainlayot',
-        title : 'Already use'
-    })
-})
 
 app.get("/contact/:nama", (req, res) => {
     const contact = findContact(req.params.nama);
