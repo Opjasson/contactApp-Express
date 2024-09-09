@@ -12,6 +12,23 @@ const {
 const { query, validationResult, body, check } = require("express-validator");
 const expressLayout = require("express-ejs-layouts");
 
+// menambahkan flash notif saat data berhasil ditambahkan
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const flash = require("connect-flash");
+
+app.use(cookieParser("secret"));
+app.use(
+    session({
+        cookie: { maxAge: 6000 },
+        secret: "secret",
+        resave: true,
+        saveUninitialized: true,
+    })
+);
+app.use(flash());
+//---------
+
 // Application middleware
 app.use((req, res, next) => {
     console.log("waktu saat ini : ", Date.now());
@@ -47,9 +64,9 @@ app.get("/contact", (req, res) => {
         layout: "./layouts/mainlayot",
         contact,
         title: "Home contact",
+        msg : req.flash('msg')
     });
 });
-
 
 // Menambahkan data
 app.post(
@@ -67,18 +84,19 @@ app.post(
     ],
     (req, res) => {
         const errors = validationResult(req);
-        console.log(errors)
+        console.log(errors);
         if (!errors.isEmpty()) {
             res.render("add", {
                 layout: "./layouts/mainlayot",
                 title: "add contact",
                 errors: errors.array() || [],
             });
+        }else{
+            addContact(req.body);
+            req.flash('msg', 'Data berhasil ditambahkan!')
+            res.redirect("/contact");
         }
 
-        addContact(req.body)
-        res.redirect('/contact')
-        
     }
 );
 
@@ -88,7 +106,6 @@ app.get("/contact/add", (req, res) => {
         title: "add contact",
     });
 });
-
 
 app.get("/contact/:nama", (req, res) => {
     const contact = findContact(req.params.nama);
