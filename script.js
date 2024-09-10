@@ -1,7 +1,9 @@
+// Setting express
 const express = require("express");
 const app = express();
 const port = 4000;
 
+// import module
 const {
     loadContact,
     findContact,
@@ -37,7 +39,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Gunakan ejs
+// Gunakan ejs middleware and setting
 app.use(expressLayout);
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -45,6 +47,8 @@ app.use(express.urlencoded({ extended: true }));
 // access static file
 app.use(express.static("public"));
 
+// route home
+// res render layout untuk menyambungkan mainlayot template setiap dipanggil di rendernya perroute
 app.get("/", (req, res) => {
     res.render("index", {
         layout: "./layouts/mainlayot",
@@ -54,6 +58,7 @@ app.get("/", (req, res) => {
     });
 });
 
+// route about
 app.get("/about", (req, res) => {
     res.render("about", {
         layout: "./layouts/mainlayot",
@@ -61,6 +66,8 @@ app.get("/about", (req, res) => {
     });
 });
 
+
+// proses showall data
 app.get("/contact", (req, res) => {
     const contact = loadContact();
     console.log(contact);
@@ -72,7 +79,7 @@ app.get("/contact", (req, res) => {
     });
 });
 
-// Menambahkan data
+// Proses Menambahkan data
 app.post(
     "/contact/add",
     [
@@ -103,6 +110,8 @@ app.post(
     }
 );
 
+
+// form add data
 app.get("/contact/add", (req, res) => {
     res.render("add", {
         layout: "./layouts/mainlayot",
@@ -165,6 +174,7 @@ app.post(
         }
     }
 );
+
 // Halaman detail contact
 app.get("/contact/:nama", (req, res) => {
     const contact = findContact(req.params.nama);
@@ -175,10 +185,12 @@ app.get("/contact/:nama", (req, res) => {
     });
 });
 
+// middleware
 app.use("/", (req, res) => {
     res.send(404);
 });
 
+// settings port
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
